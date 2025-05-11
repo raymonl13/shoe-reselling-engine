@@ -1,20 +1,20 @@
 import requests, urllib.parse, time
-from typing import Optional
+from typing import Optional, Tuple
 
 BASE = "https://www.kicksonfire.com/wp-json/search/all?query="
 UA   = {"User-Agent": "Mozilla/5.0"}
 
-def get_kof_code(q: str) -> Optional[str]:
-    url = BASE + urllib.parse.quote(q)
+def get_kof_data(query: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    url = BASE + urllib.parse.quote(query)
     r = requests.get(url, headers=UA, timeout=10)
     if r.status_code != 200:
-        return None
+        return None, None, None
     try:
-        items = r.json().get("items", [])
-    except ValueError:
-        return None
-    if not items:
-        return None
-    code = items[0].get("styleId") or items[0].get("sku")
+        item = r.json().get("items", [])[0]
+    except Exception:
+        return None, None, None
+    code      = item.get("styleId") or item.get("sku")
+    title     = item.get("title")
+    colorway  = item.get("colorway")
     time.sleep(1.0)
-    return code
+    return code, title, colorway
